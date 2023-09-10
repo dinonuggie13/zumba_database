@@ -1,0 +1,334 @@
+--zumba application database
+
+
+--User table
+create Table users(
+userid int PRIMARY KEY NOT NULL,
+firstname varchar(30) NOT NULL,
+lastname varchar(30) NOT NULL,
+email varchar(200) NOT NULL,
+passkey char(8) NOT NULL,
+residence varchar(150) NOT NULL,
+Phonenumber int NOT NULL,
+age int NOT NULL,
+gender varchar(10) check( gender IN('Male', 'Female', 'other')),
+dateJoined date NOT NULL,
+dateleft date null
+
+);
+--paymentMethodID int references payment(paymentid) NOT NULL,
+
+--concessionid int references concessions(concessionid) NOT NULL,
+
+--increasing password lenght requirement
+AlTER TABle users
+ALter Column passkey varchar(20);
+
+Alter Table users
+Add concessionid int
+references concessions(concessionid) NOT NULL;
+-- the alter table adds a concession field in the users table and references it to the concession table
+
+Alter Table users
+Add paymentid int
+references payment(paymentid) NOT NULL;
+
+select * from users;
+
+--allow users to have no initial payment method
+Alter table users 
+Alter column paymentid int null;
+
+Alter table users
+ALter column concessionid int Null;
+
+--ran into an arithmatic overflow while converting expression to an int datatype
+--the number range excedeed the limit of int capacity, replaced with big int
+Alter table users
+Alter column Phonenumber BIGINT;
+
+
+--Payment table
+create table payment(
+paymentid int Primary Key NOT NULL,
+userid int references users(userid),
+amount int,
+paymentdate date,
+note varchar(40),
+referencenumber int,
+status varchar(20) check(status in('pending', 'completed', 'failed')),
+invoicenumber int,
+classid varchar(10) references classes(classid),
+concessionid int references concessions(concessionid),
+);
+
+
+--Concessions table
+create table concessions(
+concessionid int PRIMARY KEY NOT NULL,
+concessiontype int NOT NULL check(concessiontype in('1', '7', '16', '32')),
+userid int references users(userid),
+datepaid date NOT NULL,
+status varchar(30) NOT NULL check(status in ('requested', 'used', 'paid')),
+
+);
+
+ALTER TABLE concessions
+ALTER COLUMN userid INT NULL;
+
+--Staff table
+create table staff(
+instructorid int PRIMARY KEY NOT NULL,
+firstname varchar(50) NOT NULL,
+lastname varchar(50) NOT NULL,
+email varchar(100) NOT NULL,
+phonenumber varchar(30) NOT NULL,
+gender varchar(10) check(gender in('male', 'female', 'other')),
+dateofbirth date NOT NULL,
+residence varchar(200) NOT NULL,
+experienceyears int,
+specialisation varchar(100) NOT NULL check(specialisation in ('express gold' , 'standard', 'intense')),
+availability int NOT NULL references availability(instructorid)
+);
+
+--staff availability table
+create table availability(
+instructorid int PRIMARY KEY NOT NULL,
+daysofweek varchar(10) NOT NULL,
+starttime time NOT NULL,
+endtime time NOT NULL,
+
+);
+
+--classes table
+create table classes(
+classid varchar(10) PRIMARY KEY NOT NULL,
+instructorid int references staff(instructorid) NOT NULL,
+starttime time NOT NULL,
+endtime time NOT NULL,
+daysofweek varchar(10) NOT NULL check(daysofweek in ('mon', 'tue', 'wed', 'thu', 'fri')),
+capacity int NOT NULL,
+note varchar(50),
+category varchar(100) NOT NULL check( category in ('express gold' , 'standard', 'intense')),
+);
+
+--attendance table
+create table attendance(
+userid int PRIMARY KEY NOT NULL,
+classid varchar(10) references classes(classid),
+attendancedate date NOT NULL,
+status varchar(10) NOT NULL check(status in('present', 'absent')),
+);
+
+--admin table
+create table administrator(
+firstname varchar(30) PRIMARY KEY NOT NULL,
+lastname varchar(50) NOT NULL,
+Email varchar(200),
+passkey varchar(20),
+phonenumber int NOT NULL,
+dob date,
+residence varchar(100),
+lastlogin date NOT NULL,
+);
+
+
+
+--inserting dummy data into the tables
+
+
+--Users
+INSERT INTO users (userid, firstname, lastname, email, passkey, residence, Phonenumber, age, gender, dateJoined, dateleft)
+VALUES
+    (1, 'John', 'Doe', 'john@example.com', 'password1', '123 Main St', 1234567890, 30, 'Male', '2023-09-10', NULL),
+    (2, 'Jane', 'Smith', 'jane@example.com', 'password2', '456 Elm St', 9876543210, 25, 'Female', '2023-09-09', NULL),
+    (3, 'Alice', 'Johnson', 'alice@example.com', 'password3', '789 Oak St', 5551234567, 28, 'Female', '2023-09-08', NULL),
+    (4, 'Bob', 'Brown', 'bob@example.com', 'password4', '101 Maple St', 3334445555, 35, 'Male', '2023-09-07', NULL),
+    (5, 'Ella', 'Williams', 'ella@example.com', 'password5', '222 Pine St', 8887776666, 22, 'Female', '2023-09-06', NULL),
+    (6, 'Michael', 'Lee', 'michael@example.com', 'password6', '333 Cedar St', 1112223333, 40, 'Male', '2023-09-05', NULL),
+    (7, 'Sophia', 'Garcia', 'sophia@example.com', 'password7', '444 Birch St', 9998887777, 29, 'Female', '2023-09-04',Null),
+    (8, 'William', 'Martinez', 'william@example.com', 'password8', '555 Redwood St', 7779998888, 32, 'Male', '2023-09-03',Null),
+    (9, 'Olivia', 'Lopez', 'olivia@example.com', 'password9', '666 Cedar St', 2223334444, 27, 'Female', '2023-09-02', NULL),
+    (10, 'James', 'Harris', 'james@example.com', 'password10', '777 Oak St', 4445556666, 31, 'Male', '2023-09-01', NULL),
+    (11, 'Ava', 'Clark', 'ava@example.com', 'password11', '888 Pine St', 6665554444, 24, 'Female', '2023-08-31', NULL),
+    (12, 'Alexander', 'Young', 'alex@example.com', 'password12', '999 Elm St', 5556667777, 34, 'Male', '2023-08-30', NULL),
+    (13, 'Mia', 'Walker', 'mia@example.com', 'password13', '111 Redwood St', 7776665555, 26, 'Female', '2023-08-29', NULL),
+    (14, 'Benjamin', 'White', 'benjamin@example.com', 'password14', '222 Oak St', 4447776666, 33, 'Male', '2023-08-28', NULL),
+    (15, 'Chloe', 'Martin', 'chloe@example.com', 'password15', '333 Pine St', 9994445555, 23, 'Female', '2023-08-27', NULL),
+    (16, 'Daniel', 'Scott', 'daniel@example.com', 'password16', '444 Elm St', 3339998888, 30, 'Male', '2023-08-26', NULL),
+    (17, 'Emily', 'Adams', 'emily@example.com', 'password17', '555 Cedar St', 2227776666, 25, 'Female', '2023-08-25', NULL),
+    (18, 'Jackson', 'Thomas', 'jackson@example.com', 'password18', '666 Oak St', 1115554444, 29, 'Male', '2023-08-24', NULL),
+    (19, 'Grace', 'Hall', 'grace@example.com', 'password19', '777 Redwood St', 6664445555, 27, 'Female', '2023-08-23', NULL),
+    (20, 'Ethan', 'Moore', 'ethan@example.com', 'password20', '888 Pine St', 9996667777, 32, 'Male', '2023-08-22', NULL);
+
+
+
+	--concessions
+
+INSERT INTO concessions (concessionid, concessiontype, userid, datepaid, status)
+VALUES
+    (1, 1, 1, '2023-09-10', 'paid'),
+    (2, 7, 2, '2023-09-09', 'requested'),
+    (3, 16, 3, '2023-09-08', 'paid'),
+    (4, 32, 4, '2023-09-07', 'used'),
+    (5, 1, 5, '2023-09-06', 'paid'),
+    (6, 7, 6, '2023-09-05', 'requested'),
+    (7, 16, 7, '2023-09-04', 'paid'),
+    (8, 32, 8, '2023-09-03', 'used'),
+    (9, 1, 9, '2023-09-02', 'paid'),
+    (10, 7, 10, '2023-09-01', 'requested'),
+    (11, 16, 11, '2023-08-31', 'paid'),
+    (12, 32, 12, '2023-08-30', 'used'),
+    (13, 1, 13, '2023-08-29', 'paid'),
+    (14, 7, 14, '2023-08-28', 'requested'),
+    (15, 16, 15, '2023-08-27', 'paid'),
+    (16, 32, 16, '2023-08-26', 'used'),
+    (17, 1, 17, '2023-08-25', 'paid'),
+    (18, 7, 18, '2023-08-24', 'requested'),
+    (19, 16, 19, '2023-08-23', 'paid'),
+    (20, 32, 20, '2023-08-22', 'used');
+
+
+	--staff availibility table
+
+	-- Insert 20 rows of dummy data into the "availability" table for staff
+INSERT INTO availability (instructorid, daysofweek, starttime, endtime)
+VALUES
+    (1, 'mon', '08:00:00', '12:00:00'),
+    (2, 'tue', '10:00:00', '14:00:00'),
+    (3, 'wed', '13:00:00', '17:00:00'),
+    (4, 'thu', '15:00:00', '19:00:00'),
+    (5, 'fri', '09:00:00', '13:00:00'),
+    (6, 'sat', '14:00:00', '18:00:00'),
+    (7, 'sun', '11:00:00', '15:00:00'),
+    (8, 'mon', '08:30:00', '12:30:00'),
+    (9, 'tue', '10:30:00', '14:30:00'),
+    (10, 'wed', '13:30:00', '17:30:00'),
+    (11, 'thu', '15:30:00', '19:30:00'),
+    (12, 'fri', '10:00:00', '14:00:00'),
+    (13, 'sat', '12:00:00', '16:00:00'),
+    (14, 'sun', '09:30:00', '13:30:00'),
+    (15, 'mon', '11:00:00', '15:00:00'),
+    (16, 'tue', '13:00:00', '17:00:00'),
+    (17, 'wed', '14:30:00', '18:30:00'),
+    (18, 'thu', '12:30:00', '16:30:00'),
+    (19, 'fri', '11:30:00', '15:30:00'),
+    (20, 'sat', '10:00:00', '14:00:00');
+
+
+
+	--staff table
+	
+INSERT INTO staff (instructorid, firstname, lastname, email, phonenumber, gender, dateofbirth, residence, experienceyears, specialisation, availability)
+VALUES
+    (1, 'John', 'Doe', 'john@example.com', '123-456-7890', 'male', '1985-05-15', '123 Main St', 5, 'express gold', 1),
+    (2, 'Jane', 'Smith', 'jane@example.com', '987-654-3210', 'female', '1987-08-22', '456 Elm St', 3, 'standard', 2),
+    (3, 'Alice', 'Johnson', 'alice@example.com', '555-123-4567', 'female', '1990-03-10', '789 Oak St', 7, 'intense', 3),
+    (4, 'Bob', 'Brown', 'bob@example.com', '333-444-5555', 'male', '1982-12-01', '101 Maple St', 8, 'express gold', 4),
+    (5, 'Ella', 'Williams', 'ella@example.com', '888-777-6666', 'female', '1995-07-20', '222 Pine St', 2, 'standard', 5),
+    (6, 'Michael', 'Lee', 'michael@example.com', '111-222-3333', 'male', '1980-09-05', '333 Cedar St', 9, 'intense', 6),
+    (7, 'Sophia', 'Garcia', 'sophia@example.com', '999-888-7777', 'female', '1992-01-18', '444 Birch St', 4, 'express gold', 7),
+    (8, 'William', 'Martinez', 'william@example.com', '777-999-8888', 'male', '1988-06-14', '555 Redwood St', 6, 'standard', 8),
+    (9, 'Olivia', 'Lopez', 'olivia@example.com', '222-333-4444', 'female', '1993-04-25', '666 Cedar St', 4, 'intense', 9),
+    (10, 'James', 'Harris', 'james@example.com', '444-555-6666', 'male', '1989-11-30', '777 Oak St', 7, 'express gold', 10),
+    (11, 'Ava', 'Clark', 'ava@example.com', '777-555-4444', 'female', '1983-08-12', '888 Pine St', 5, 'standard', 11),
+    (12, 'Alexander', 'Young', 'alex@example.com', '222-111-0000', 'male', '1991-02-28', '999 Elm St', 8, 'intense', 12),
+    (13, 'Mia', 'Walker', 'mia@example.com', '555-666-7777', 'female', '1997-07-01', '111 Redwood St', 3, 'express gold', 13),
+    (14, 'Benjamin', 'White', 'benjamin@example.com', '999-888-7777', 'male', '1986-04-09', '222 Oak St', 6, 'standard', 14),
+    (15, 'Chloe', 'Martin', 'chloe@example.com', '333-444-5555', 'female', '1994-10-05', '333 Pine St', 9, 'intense', 15),
+    (16, 'Daniel', 'Scott', 'daniel@example.com', '777-888-9999', 'male', '1984-12-15', '444 Elm St', 2, 'express gold', 16),
+    (17, 'Emily', 'Adams', 'emily@example.com', '444-555-6666', 'female', '1998-03-20', '555 Cedar St', 7, 'standard', 17),
+    (18, 'Jackson', 'Thomas', 'jackson@example.com', '222-333-4444', 'male', '1981-09-10', '666 Oak St', 4, 'intense', 18),
+    (19, 'Grace', 'Hall', 'grace@example.com', '555-666-7777', 'female', '1996-06-25', '777 Redwood St', 6, 'express gold', 19),
+    (20, 'Ethan', 'Moore', 'ethan@example.com', '999-888-7777', 'male', '1987-01-31', '432 greenland dr', 4, 'intense', 13);
+
+
+
+	--classes table
+	
+INSERT INTO classes (classid, instructorid, starttime, endtime, daysofweek, capacity, note, category)
+VALUES
+    ('A101', 1, '08:00:00', '09:30:00', 'mon', 30, 'Morning session', 'express gold'),
+    ('B102', 2, '10:00:00', '11:30:00', 'tue', 25, 'Yoga for beginners', 'standard'),
+    ('C103', 3, '16:30:00', '18:00:00', 'wed', 20, NULL, 'intense'),
+    ('D104', 4, '18:45:00', '20:15:00', 'thu', 35, 'Cardio kickboxing', 'standard'),
+    ('E105', 5, '19:00:00', '20:30:00', 'fri', 28, 'Hip hop dance', 'intense'),
+    ('F106', 6, '07:30:00', '09:00:00', 'mon', 32, 'Indoor cycling', 'standard'),
+    ('G107', 7, '11:15:00', '12:45:00', 'tue', 24, 'Hatha yoga', 'standard'),
+    ('H108', 8, '15:00:00', '16:30:00', 'wed', 22, 'Functional training', 'intense'),
+    ('I109', 9, '08:30:00', '10:00:00', 'thu', 30, NULL, 'express gold'),
+    ('J110', 10, '17:30:00', '19:00:00', 'fri', 26, 'CrossFit', 'intense'),
+    ('K111', 11, '08:45:00', '10:15:00', 'mon', 31, 'Barre fitness', 'standard'),
+    ('L112', 12, '06:15:00', '07:45:00', 'tue', 27, 'Strength training', 'intense'),
+    ('M113', 13, '07:00:00', '08:30:00', 'wed', 29, 'Tai Chi', 'standard'),
+    ('N114', 14, '16:00:00', '17:30:00', 'thu', 23, 'Prenatal yoga', 'express gold'),
+    ('O115', 15, '17:45:00', '19:15:00', 'fri', 33, 'Boxing fitness', 'intense'),
+    ('P116', 16, '10:30:00', '12:00:00', 'mon', 25, 'Zumba Toning', 'standard'),
+    ('Q117', 17, '13:15:00', '14:45:00', 'tue', 21, 'Aqua aerobics', 'standard'),
+    ('R118', 18, '15:30:00', '17:00:00', 'wed', 27, 'Meditation', 'intense'),
+    ('S119', 19, '07:45:00', '09:15:00', 'thu', 28, 'Strength Yoga', 'standard'),
+    ('T120', 20, '14:00:00', '15:30:00', 'fri', 30, 'TRX training', 'intense');
+
+
+
+
+	--payments
+	
+INSERT INTO payment (paymentid, userid, amount, paymentdate, note, referencenumber, status, invoicenumber, classid, concessionid)
+VALUES
+    (1, 1, 100, '2023-09-10', 'Payment for membership', 12345, 'completed', 101, 'A101', 1),
+    (2, 2, 75, '2023-09-09', 'Payment for class registration', 54321, 'completed', 102, 'B102', 2),
+    (3, 3, 50, '2023-09-08', 'Payment for annual fee', 98765, 'completed', 103, 'C103', 3),
+    (4, 4, 125, '2023-09-07', 'Payment for special event', 24680, 'completed', 104, 'D104', 4),
+    (5, 5, 60, '2023-09-06', 'Payment for workshop', 13579, 'completed', 105, 'E105', 5),
+    (6, 6, 90, '2023-09-05', 'Payment for class registration', 86420, 'completed', 106, 'F106', 6),
+    (7, 7, 75, '2023-09-04', 'Payment for annual fee', 54321, 'completed', 107, 'G107', 7),
+    (8, 8, 110, '2023-09-03', 'Payment for special event', 98765, 'completed', 108, 'H108', 8),
+    (9, 9, 55, '2023-09-02', 'Payment for workshop', 12345, 'completed', 109, 'I109', 9),
+    (10, 10, 95, '2023-09-01', 'Payment for class registration', 86420, 'completed', 110, 'J110', 10),
+    (11, 11, 100, '2023-08-31', 'Payment for annual fee', 13579, 'completed', 111, 'K111', 11),
+    (12, 12, 150, '2023-08-30', 'Payment for special event', 24680, 'completed', 112, 'L112', 12),
+    (13, 13, 45, '2023-08-29', 'Payment for workshop', 54321, 'completed', 113, 'M113', 13),
+    (14, 14, 80, '2023-08-28', 'Payment for class registration', 98765, 'completed', 114, 'N114', 14),
+    (15, 15, 70, '2023-08-27', 'Payment for annual fee', 86420, 'completed', 115, 'O115', 15),
+    (16, 16, 130, '2023-08-26', 'Payment for special event', 12345, 'completed', 116, 'P116', 16),
+    (17, 17, 85, '2023-08-25', 'Payment for workshop', 13579, 'completed', 117, 'Q117', 17),
+    (18, 18, 95, '2023-08-24', 'Payment for class registration', 24680, 'completed', 118, 'R118', 18),
+    (19, 19, 120, '2023-08-23', 'Payment for annual fee', 54321, 'completed', 119, 'S119', 19),
+    (20, 20, 65, '2023-08-22', 'Payment for special event', 98765, 'completed', 120, 'T120', 20);
+
+
+	--attendance table
+INSERT INTO attendance (userid, classid, attendancedate, status)
+VALUES
+    (1, 'A101', '2023-09-10', 'present'),
+    (2, 'B102', '2023-09-09', 'present'),
+    (3, 'C103', '2023-09-08', 'absent'),
+    (4, 'D104', '2023-09-07', 'present'),
+    (5, 'E105', '2023-09-06', 'absent'),
+    (6, 'F106', '2023-09-05', 'present'),
+    (7, 'G107', '2023-09-04', 'absent'),
+    (8, 'H108', '2023-09-03', 'present'),
+    (9, 'I109', '2023-09-02', 'present'),
+    (10, 'J110', '2023-09-01', 'absent'),
+    (11, 'K111', '2023-08-31', 'present'),
+    (12, 'L112', '2023-08-30', 'absent'),
+    (13, 'M113', '2023-08-29', 'present'),
+    (14, 'N114', '2023-08-28', 'absent'),
+    (15, 'O115', '2023-08-27', 'present'),
+    (16, 'P116', '2023-08-26', 'absent'),
+    (17, 'Q117', '2023-08-25', 'present'),
+    (18, 'R118', '2023-08-24', 'present'),
+    (19, 'S119', '2023-08-23', 'absent'),
+    (20, 'T120', '2023-08-22', 'present');
+   
+   
+
+
+   --admin table
+
+INSERT INTO administrator (firstname, lastname, email, passkey, phonenumber, dob, residence, lastlogin)
+VALUES
+    ('John', 'Doe', 'john@example.com', 'adminpass1', 1234567890, '1980-05-15', '123 Admin St', '2023-09-10');
+
+
